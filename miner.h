@@ -113,6 +113,8 @@ bool show_winner = false;			// показывать победителя
 SYSTEMTIME cur_time;				// Текущее время
 unsigned long long total_size = 0;	// Общий объем плотов
 
+char *miner_name; // name of the miner
+
 WINDOW * win_main;
 //PANEL  *panel_main;
 

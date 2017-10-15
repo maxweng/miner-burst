@@ -2,7 +2,6 @@
 #include "miner.h"
 
 
-
 // Initialize static member data
 const InstructionSet::InstructionSet_Internal InstructionSet::CPU_Rep;
 
@@ -843,6 +842,9 @@ void send_i(void)
 			return;
 		}
 
+		// for debugging purposes, to remove later.
+		//shares.push_back({ "123.45.67.89", 14829735431805717965, 1234567, 1234567 });
+
 		for (auto iter = shares.begin(); iter != shares.end();)
 		{
 
@@ -912,7 +914,8 @@ void send_i(void)
 				{
 					unsigned long long total = total_size / 1024 / 1024 / 1024;
 					for (auto It = satellite_size.begin(); It != satellite_size.end(); ++It) total = total + It->second;
-					bytes = sprintf_s(buffer, buffer_size, "POST /burst?requestType=submitNonce&accountId=%llu&nonce=%llu&deadline=%llu HTTP/1.0\r\nHost: %s:%s\r\nX-Miner: Blago %s\r\nX-Capacity: %llu\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", iter->account_id, iter->nonce, iter->best, nodeaddr.c_str(), nodeport.c_str(), version, total);
+					bytes = sprintf_s(buffer, buffer_size, "POST /burst?requestType=submitNonce&accountId=%llu&nonce=%llu&deadline=%llu HTTP/1.0\r\nHost: %s:%s\r\nX-Miner: Blago %s\r\nX-MinerName: %s\r\nX-Capacity: %llu\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", iter->account_id, iter->nonce, iter->best, nodeaddr.c_str(), nodeport.c_str(), version, miner_name, total);
+					Log("Subit Nounce: "); Log(buffer);
 				}
 
 				// Sending to server
@@ -2223,6 +2226,26 @@ void GetCPUInfo(void)
 		wprintw(win_main, "\n", 0);
 }
 
+// Get and display the name of the computer.
+void GetMinerName(void)
+{
+	#define MINER_NAME_BUFFER_SIZE 32767
+	TCHAR bufMinerName[MINER_NAME_BUFFER_SIZE];
+	DWORD  bufCharCount = MINER_NAME_BUFFER_SIZE;
+
+	if (!GetComputerName(bufMinerName, &bufCharCount))
+		wcscpy_s(bufMinerName, L"NO_MINERNAME");
+	// Convert wchar to char for the log output.
+	//wcstombs(miner_name, bufMinerName, bufCharCount);
+	// Get the size of the buffer to store UTF-8 chars first
+	int bufSize = WideCharToMultiByte(CP_UTF8, 0, bufMinerName, -1, NULL, 0, NULL, NULL);
+	miner_name = new char[bufSize];
+	// Convert unicode to UTF-8
+	WideCharToMultiByte(CP_UTF8, 0, bufMinerName, -1, miner_name, bufSize, NULL, NULL);
+
+	Log("\nMiner name: "); Log(miner_name);
+	wprintw(win_main, "Miner name:    %s\n", miner_name);
+}
 
 /*
 #ifdef GPU_ON_CPP
@@ -2789,6 +2812,8 @@ int main(int argc, char **argv) {
 
 
 	GetCPUInfo();
+
+	GetMinerName();
 
 	wrefresh(win_main);
 	wrefresh(win_progress);
