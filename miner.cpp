@@ -265,6 +265,10 @@ int load_config(char const *const filename)
 		if(document.HasMember("WinSizeY") && (document["WinSizeY"].IsUint())) win_size_y = (short)document["WinSizeY"].GetUint();
 		Log_u(win_size_y);
 
+		Log("\nAccount Key: ");
+		if (document.HasMember("AccountKey") && document["AccountKey"].IsString())	account_key = document["AccountKey"].GetString();
+		Log(account_key.c_str());
+
 #ifdef GPU_ON_C
 		Log("\nGPU_Platform: "); 
 		if (document.HasMember("GPU_Platform") && (document["GPU_Platform"].IsInt())) gpu_devices.use_gpu_platform = (size_t)document["GPU_Platform"].GetUint();
@@ -914,7 +918,7 @@ void send_i(void)
 				{
 					unsigned long long total = total_size / 1024 / 1024 / 1024;
 					for (auto It = satellite_size.begin(); It != satellite_size.end(); ++It) total = total + It->second;
-					bytes = sprintf_s(buffer, buffer_size, "POST /burst?requestType=submitNonce&accountId=%llu&nonce=%llu&deadline=%llu HTTP/1.0\r\nHost: %s:%s\r\nX-Miner: Blago %s\r\nX-MinerName: %s\r\nX-Capacity: %llu\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", iter->account_id, iter->nonce, iter->best, nodeaddr.c_str(), nodeport.c_str(), version, miner_name, total);
+					bytes = sprintf_s(buffer, buffer_size, "POST /burst?requestType=submitNonce&accountId=%llu&nonce=%llu&deadline=%llu HTTP/1.0\r\nHost: %s:%s\r\nX-Account: %s\r\nX-Miner: Blago %s\r\nX-MinerName: %s\r\nX-Capacity: %llu\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", iter->account_id, iter->nonce, iter->best, nodeaddr.c_str(), nodeport.c_str(), account_key.c_str(), version, miner_name, total);
 					Log("Subit Nounce: "); Log(buffer);
 				}
 
